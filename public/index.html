@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance Predictor | Pass & Fail Prediction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 960px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .badge-tag {
+            display: inline-block;
+            background: #dbeafe;
+            color: var(--primary);
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+
+        header h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.2;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        .main-card {
+            background: var(--card-bg);
+            border-radius: 1.25rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+        }
+
+        @media (max-width: 768px) {
+            .main-card {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-section {
+            padding: 2.25rem;
+            border-right: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .preset-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-muted);
+        }
+
+        .preset-btn:hover {
+            background: #e2e8f0;
+            color: var(--text-main);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-group label span.val-display {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .input-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.65rem;
+            border: 1.5px solid var(--border);
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .input-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .range-slider {
+            width: 100%;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.9rem;
+            border-radius: 0.75rem;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Result Section */
+        .result-section {
+            padding: 2.25rem;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .placeholder-state {
+            color: var(--text-muted);
+            padding: 2rem 1rem;
+        }
+
+        .placeholder-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+
+        .result-content {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.4s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .verdict-banner {
+            border-radius: 1rem;
+            padding: 1.5rem 1rem;
+            margin-bottom: 1.5rem;
+            color: white;
+            width: 100%;
+        }
+
+        .verdict-banner.pass {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            box-shadow: 0 10px 20px -5px rgba(22, 163, 74, 0.4);
+        }
+
+        .verdict-banner.fail {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            box-shadow: 0 10px 20px -5px rgba(220, 38, 38, 0.4);
+        }
+
+        .verdict-text {
+            font-size: 2.25rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .verdict-sub {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-box {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 0.85rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 0.25rem;
+        }
+
+        .recommendation-box {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 0.85rem;
+            padding: 1.15rem;
+            width: 100%;
+            text-align: left;
+        }
+
+        .rec-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #334155;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .rec-text {
+            font-size: 0.9rem;
+            color: #475569;
+            line-height: 1.4;
+        }
+
+        footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <span class="badge-tag">Academic Machine Learning Project</span>
+        <h1>Student Performance Prediction</h1>
+        <p>Enter academic parameters to predict <strong>Pass / Fail outcome</strong> and <strong>Expected Marks</strong></p>
+    </header>
+
+    <div class="main-card">
+        <!-- Form Section -->
+        <div class="form-section">
+            <div class="section-title">
+                <span>📝</span> Student Profile Input
+            </div>
+
+            <!-- Quick Preset Fill Buttons -->
+            <div class="preset-buttons">
+                <span style="font-size: 0.8rem; font-weight: 700; align-self: center; color: var(--text-muted);">Quick Test:</span>
+                <button type="button" class="preset-btn" onclick="applyPreset(7.5, 92, 85, 7.5, 8)">🌟 Topper</button>
+                <button type="button" class="preset-btn" onclick="applyPreset(4.5, 76, 58, 7.0, 3)">📚 Average</button>
+                <button type="button" class="preset-btn" onclick="applyPreset(1.5, 48, 35, 5.0, 0)">⚠️ At Risk</button>
+            </div>
+
+            <form id="predictionForm">
+                <div class="form-group">
+                    <label for="study_hours">
+                        <span>Daily Study Hours</span>
+                        <span class="val-display" id="study_val">5.5 hrs</span>
+                    </label>
+                    <input type="range" class="range-slider" id="study_hours" min="0.5" max="12.0" step="0.25" value="5.5" oninput="updateVal('study_hours', 'study_val', ' hrs')">
+                </div>
+
+                <div class="form-group">
+                    <label for="attendance">
+                        <span>Attendance Percentage</span>
+                        <span class="val-display" id="att_val">82%</span>
+                    </label>
+                    <input type="range" class="range-slider" id="attendance" min="30" max="100" step="1" value="82" oninput="updateVal('attendance', 'att_val', '%')">
+                </div>
+
+                <div class="form-group">
+                    <label for="prev_marks">
+                        <span>Previous Exam Marks</span>
+                        <span class="val-display" id="prev_val">70%</span>
+                    </label>
+                    <input type="range" class="range-slider" id="prev_marks" min="10" max="100" step="1" value="70" oninput="updateVal('prev_marks', 'prev_val', '%')">
+                </div>
+
+                <div class="form-group">
+                    <label for="sleep_hours">
+                        <span>Daily Sleep Hours</span>
+                        <span class="val-display" id="sleep_val">7.0 hrs</span>
+                    </label>
+                    <input type="range" class="range-slider" id="sleep_hours" min="3.0" max="11.0" step="0.5" value="7.0" oninput="updateVal('sleep_hours', 'sleep_val', ' hrs')">
+                </div>
+
+                <div class="form-group">
+                    <label for="practice_tests">
+                        <span>Practice Mock Tests Attempted</span>
+                        <span class="val-display" id="tests_val">4 tests</span>
+                    </label>
+                    <input type="range" class="range-slider" id="practice_tests" min="0" max="15" step="1" value="4" oninput="updateVal('practice_tests', 'tests_val', ' tests')">
+                </div>
+
+                <button type="submit" class="submit-btn" id="predictBtn">
+                    <span>⚡ Predict Pass / Fail</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-section">
+            <div class="placeholder-state" id="placeholderBox">
+                <div class="placeholder-icon">🎓</div>
+                <h3 style="font-weight: 700; margin-bottom: 0.5rem; color: #334155;">Ready to Predict</h3>
+                <p style="font-size: 0.9rem;">Fill in the student details or click a Quick Test preset to evaluate academic performance.</p>
+            </div>
+
+            <div class="result-content" id="resultBox">
+                <!-- Verdict Banner -->
+                <div class="verdict-banner pass" id="verdictBanner">
+                    <div class="verdict-text" id="verdictText">PASS</div>
+                    <div class="verdict-sub" id="verdictSub">High probability of clearing examinations</div>
+                </div>
+
+                <!-- Metrics Grid -->
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-value" id="marksText" style="color: var(--primary);">67.1 / 100</div>
+                        <div class="stat-label">Expected Marks</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="probText" style="color: var(--success);">99.8%</div>
+                        <div class="stat-label">Pass Confidence</div>
+                    </div>
+                </div>
+
+                <!-- Recommendation Box -->
+                <div class="recommendation-box">
+                    <div class="rec-title">
+                        <span>💡</span> AI Academic Advice
+                    </div>
+                    <div class="rec-text" id="adviceText">
+                        Student demonstrates strong consistency. Recommend continuing regular revision sessions.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Built with Python, Scikit-Learn & Flask | Semester ML Assessment Project</p>
+    </footer>
+</div>
+
+<script>
+    function updateVal(inputId, displayId, suffix) {
+        document.getElementById(displayId).textContent = document.getElementById(inputId).value + suffix;
+    }
+
+    function applyPreset(study, att, prev, sleep, tests) {
+        document.getElementById('study_hours').value = study;
+        document.getElementById('study_val').textContent = study + ' hrs';
+
+        document.getElementById('attendance').value = att;
+        document.getElementById('att_val').textContent = att + '%';
+
+        document.getElementById('prev_marks').value = prev;
+        document.getElementById('prev_val').textContent = prev + '%';
+
+        document.getElementById('sleep_hours').value = sleep;
+        document.getElementById('sleep_val').textContent = sleep + ' hrs';
+
+        document.getElementById('practice_tests').value = tests;
+        document.getElementById('tests_val').textContent = tests + ' tests';
+
+        // Automatically trigger prediction
+        performPrediction();
+    }
+
+    // Direct mathematical / API calculation
+    async function performPrediction() {
+        const study = parseFloat(document.getElementById('study_hours').value);
+        const attendance = parseFloat(document.getElementById('attendance').value);
+        const prev = parseFloat(document.getElementById('prev_marks').value);
+        const sleep = parseFloat(document.getElementById('sleep_hours').value);
+        const tests = parseInt(document.getElementById('practice_tests').value);
+
+        try {
+            // First try calling the Flask backend API
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    study_hours: study,
+                    attendance: attendance,
+                    previous_marks: prev,
+                    sleep_hours: sleep,
+                    practice_tests: tests
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                renderResult(data.status, data.predicted_marks, data.pass_probability, data.advice);
+                return;
+            }
+        } catch (err) {
+            // Fallback to client-side trained model formula if opened directly as file
+        }
+
+        // Client-side exact formula fallback
+        const pred_marks = Math.min(100.0, Math.max(0.0,
+            0.35 * prev + 0.25 * attendance + 2.80 * study + 1.20 * tests + 0.80 * (sleep - 5.0)
+        ));
+        const z = (pred_marks - 40.0) / 4.2;
+        const pass_prob = (1.0 / (1.0 + Math.exp(-z))) * 100.0;
+        const status = pred_marks >= 40.0 ? "PASS" : "FAIL";
+
+        let advice = "Student has balanced academic habits!";
+        if (attendance < 75) {
+            advice = "Attendance is critically below 75%. Prioritize attending lectures to avoid academic detention.";
+        } else if (study < 3.0) {
+            advice = "Self-study time is low. Adding 1.5 to 2 hours of daily study will boost expected score by ~5 marks.";
+        } else if (pred_marks < 40) {
+            advice = "High academic risk detected! Urgent remedial classes and mock exam revision required.";
+        }
+
+        renderResult(status, pred_marks.toFixed(1), pass_prob.toFixed(1), advice);
+    }
+
+    function renderResult(status, marks, prob, advice) {
+        document.getElementById('placeholderBox').style.display = 'none';
+        const resultBox = document.getElementById('resultBox');
+        resultBox.style.display = 'block';
+
+        const banner = document.getElementById('verdictBanner');
+        const verdictText = document.getElementById('verdictText');
+        const verdictSub = document.getElementById('verdictSub');
+
+        if (status === "PASS") {
+            banner.className = 'verdict-banner pass';
+            verdictText.textContent = 'PASS';
+            verdictSub.textContent = 'High probability of clearing examinations';
+        } else {
+            banner.className = 'verdict-banner fail';
+            verdictText.textContent = 'FAIL / AT RISK';
+            verdictSub.textContent = 'Student requires urgent remedial counseling';
+        }
+
+        document.getElementById('marksText').textContent = marks + ' / 100';
+        document.getElementById('probText').textContent = prob + '%';
+        document.getElementById('adviceText').textContent = advice;
+    }
+
+    document.getElementById('predictionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        performPrediction();
+    });
+</script>
+
+</body>
+</html>
+
